@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" width="640" height="640">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="72%">
+      <stop offset="0" stop-color="#2f5fa8"/>
+      <stop offset="1" stop-color="#10264d"/>
+    </radialGradient>
+    <linearGradient id="hat" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd84a"/>
+      <stop offset="1" stop-color="#f2a900"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f7d3ae"/>
+      <stop offset="1" stop-color="#e8b689"/>
+    </linearGradient>
+    <linearGradient id="suit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2f6fd6"/>
+      <stop offset="1" stop-color="#1d4c9c"/>
+    </linearGradient>
+  </defs>
+
+  <!-- background -->
+  <rect width="640" height="640" fill="url(#bg)"/>
+  <circle cx="320" cy="320" r="296" fill="none" stroke="#ffd84a" stroke-width="6" opacity=".35"/>
+  <!-- background bolts -->
+  <g fill="#ffd84a" opacity=".85">
+    <path d="M96 150 L132 150 L114 190 L140 190 L92 262 L106 208 L82 208 Z"/>
+    <path d="M532 118 L560 118 L546 150 L566 150 L528 206 L540 164 L520 164 Z"/>
+    <path d="M556 300 l5 14 14 5 -14 5 -5 14 -5 -14 -14 -5 14 -5z"/>
+    <path d="M82 330 l4 11 11 4 -11 4 -4 11 -4 -11 -11 -4 11 -4z"/>
+  </g>
+
+  <!-- body: shirt + overalls -->
+  <path d="M100 640 C110 548 190 506 320 506 C450 506 530 548 540 640 Z" fill="#e9eef7"/>
+  <path d="M168 640 L168 560 C168 540 186 528 206 528 L434 528 C454 528 472 540 472 560 L472 640 Z" fill="url(#suit)"/>
+  <!-- straps -->
+  <path d="M196 528 L232 506 L262 506 L232 560 Z" fill="#1d4c9c"/>
+  <path d="M444 528 L408 506 L378 506 L408 560 Z" fill="#1d4c9c"/>
+  <circle cx="236" cy="552" r="9" fill="#ffd84a"/>
+  <circle cx="404" cy="552" r="9" fill="#ffd84a"/>
+  <!-- chest badge with bolt -->
+  <rect x="282" y="560" width="76" height="62" rx="12" fill="#ffd84a"/>
+  <path d="M326 568 L304 598 L318 598 L310 616 L338 584 L324 584 L332 568 Z" fill="#1d4c9c"/>
+  <!-- collar -->
+  <path d="M262 506 L320 546 L378 506 Z" fill="#cfd8e6"/>
+
+  <!-- neck -->
+  <path d="M282 470 L358 470 L362 512 L320 540 L278 512 Z" fill="#e2ad80"/>
+
+  <!-- ears -->
+  <ellipse cx="200" cy="356" rx="24" ry="34" fill="#eab88c"/>
+  <ellipse cx="440" cy="356" rx="24" ry="34" fill="#eab88c"/>
+
+  <!-- head -->
+  <path d="M206 300 C206 214 262 176 320 176 C378 176 434 214 434 300 L434 360 C434 440 382 492 320 492 C258 492 206 440 206 360 Z" fill="url(#skin)"/>
+
+  <!-- grey hair at temples -->
+  <path d="M208 290 C212 262 222 250 236 246 L236 318 C224 314 212 306 208 290 Z" fill="#a9a9a9"/>
+  <path d="M432 290 C428 262 418 250 404 246 L404 318 C416 314 428 306 432 290 Z" fill="#a9a9a9"/>
+
+  <!-- eyebrows -->
+  <path d="M248 302 C262 288 288 286 300 296" fill="none" stroke="#6b6b6b" stroke-width="11" stroke-linecap="round"/>
+  <path d="M392 302 C378 288 352 286 340 296" fill="none" stroke="#6b6b6b" stroke-width="11" stroke-linecap="round"/>
+
+  <!-- eyes (friendly squint) -->
+  <path d="M254 334 C266 320 288 320 298 334" fill="none" stroke="#2b2b2b" stroke-width="9" stroke-linecap="round"/>
+  <path d="M386 334 C374 320 352 320 342 334" fill="none" stroke="#2b2b2b" stroke-width="9" stroke-linecap="round"/>
+  <!-- cheeks -->
+  <ellipse cx="252" cy="384" rx="24" ry="14" fill="#f19b8a" opacity=".45"/>
+  <ellipse cx="388" cy="384" rx="24" ry="14" fill="#f19b8a" opacity=".45"/>
+
+  <!-- nose -->
+  <path d="M320 336 C304 352 298 384 310 396 C318 402 328 402 334 396 C344 384 336 352 320 336 Z" fill="#e1a57a"/>
+
+  <!-- moustache -->
+  <path d="M320 402 C300 394 268 396 250 414 C240 424 244 438 258 436 C280 432 300 424 320 418 C340 424 360 432 382 436 C396 438 400 424 390 414 C372 396 340 394 320 402 Z" fill="#7a7a7a"/>
+  <!-- smile -->
+  <path d="M286 446 C302 462 338 462 354 446" fill="none" stroke="#8a3b2e" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- hard hat -->
+  <path d="M196 292 C196 196 252 146 320 146 C388 146 444 196 444 292 Z" fill="url(#hat)"/>
+  <path d="M300 150 L340 150 L344 292 L296 292 Z" fill="#ffe788" opacity=".55"/>
+  <path d="M236 200 C246 184 258 172 272 164 L268 292 L240 292 Z" fill="#ffe27a" opacity=".35"/>
+  <rect x="172" y="280" width="296" height="30" rx="15" fill="#f2a900"/>
+  <rect x="172" y="280" width="296" height="10" rx="5" fill="#ffd84a"/>
+  <!-- bolt on the hat -->
+  <path d="M330 186 L300 236 L320 236 L308 270 L348 220 L328 220 L340 186 Z" fill="#1d4c9c"/>
+
+  <!-- screwdriver behind ear -->
+  <g transform="rotate(-28 470 300)">
+    <rect x="452" y="230" width="16" height="60" rx="6" fill="#e53935"/>
+    <rect x="457" y="290" width="6" height="40" fill="#c0c6cf"/>
+  </g>
+</svg>
