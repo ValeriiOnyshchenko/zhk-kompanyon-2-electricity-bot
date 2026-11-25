@@ -1,8 +1,10 @@
+using System.Security.Cryptography;
 using Microsoft.Extensions.Options;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using ZhkElectricityBot.Storage;
 
 namespace ZhkElectricityBot.Bot;
 
@@ -11,6 +13,7 @@ public sealed class BotService(
     ITelegramBotClient bot,
     UpdateHandler handler,
     IOptions<ScheduleOptions> schedule,
+    StateStore state,
     ILogger<BotService> log) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken ct)
@@ -18,11 +21,39 @@ public sealed class BotService(
         var me = await bot.GetMe(ct);
         log.LogInformation("Started as @{Username}", me.Username);
         await SyncProfileAsync(ct);
+        await SyncPhotoAsync(ct);
 
         await bot.ReceiveAsync(handler, new ReceiverOptions
         {
             AllowedUpdates = [UpdateType.Message, UpdateType.CallbackQuery, UpdateType.MyChatMember],
         }, ct);
+    }
+
+    /// <summary>
+    /// Uploads the embedded assets/avatar.jpg as the bot's profile photo — once per version of the file
+    /// (its hash is stored in bot_state), so restarts don't re-upload it.
+    /// </summary>
+    private async Task SyncPhotoAsync(CancellationToken ct)
+    {
+        const string key = "profile_photo_sha256";
+        try
+        {
+            await using var resource = typeof(BotService).Assembly.GetManifestResourceStream("avatar.jpg");
+            if (resource is null) return;
+            using var photo = new MemoryStream();
+            await resource.CopyToAsync(photo, ct);
+            var hash = Convert.ToHexStringLower(SHA256.HashData(photo.ToArray()));
+            if (await state.GetAsync(key, ct) == hash) return;
+
+            photo.Position = 0;
+            await bot.SetMyProfilePhoto(new InputProfilePhotoStatic { Photo = InputFile.FromStream(photo, "avatar.jpg") }, ct);
+            await state.SetAsync(key, hash, ct);
+            log.LogInformation("Profile photo updated");
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            log.LogWarning(ex, "Could not set the profile photo");
+        }
     }
 
     /// <summary>Pushes name/descriptions/commands from <see cref="BotTexts"/>, only when they changed (rate-limited calls).</summary>

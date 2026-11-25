@@ -13,13 +13,13 @@ public static class BotTexts
 {
     // ---- Telegram profile (limits: name 64, short description 120, description 512 chars) ----
 
-    public const string Name = "Дядько Електрик ⚡";
+    public const string Name = "Бот-електрик ЖК Компаньйон ⚡";
 
     public const string ShortDescription =
         "Графік вимкнень світла і стан резервного живлення ЖК «Компаньйон»: вимкнення, батареї, прогнози.";
 
     public static string Description(ScheduleOptions o) =>
-        "Добрий день! Я — Дядько Електрик 👷‍♂️⚡\n\n" +
+        "Добрий день! Я — бот-електрик ЖК «Компаньйон» 👷‍♂️⚡\n\n" +
         "Стежу за світлом у ЖК «Компаньйон»:\n" +
         $"• графік погодинних вимкнень для групи {o.Group} — повідомлю, коли він зʼявиться чи зміниться, " +
         $"і нагадаю за {o.ReminderMinutes} хв до вимкнення;\n" +
@@ -38,7 +38,7 @@ public static class BotTexts
     ];
 
     public static string Welcome(IReadOnlyList<Feature> features) =>
-        "Добрий день! 👷‍♂️⚡ Я — Дядько Електрик, і тепер ви на звʼязку.\n\n" +
+        "Добрий день! 👷‍♂️⚡ Я — бот-електрик ЖК «Компаньйон», і тепер ви на звʼязку.\n\n" +
         "Ось що я для вас робитиму:\n" +
         string.Join("\n", features.Select(f => "• " + Html(FeatureLong(f)))) + "\n\n" +
         "Команди:\n" +
@@ -57,7 +57,7 @@ public static class BotTexts
     public const string NotSubscribed = "Ви ще не підписані — натисніть /start 🙂";
 
     public const string Unknown =
-        "Я дядько простий — розмовляю командами 🙂\n\n/status — стан зараз\n/schedule — графік\n/settings — сповіщення\n/stop — відписатися";
+        "Я електрик простий — розмовляю командами 🙂\n\n/status — стан зараз\n/schedule — графік\n/settings — сповіщення\n/stop — відписатися";
 
     public const string SettingsIntro = "Оберіть, які сповіщення надсилати (натисніть, щоб увімкнути чи вимкнути):";
 

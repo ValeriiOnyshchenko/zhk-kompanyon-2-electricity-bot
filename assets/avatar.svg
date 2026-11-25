@@ -58,18 +58,27 @@
   <path d="M432 290 C428 262 418 250 404 246 L404 318 C416 314 428 306 432 290 Z" fill="#a9a9a9"/>
 
   <!-- eyebrows -->
-  <path d="M248 302 C262 288 288 286 300 296" fill="none" stroke="#6b6b6b" stroke-width="11" stroke-linecap="round"/>
-  <path d="M392 302 C378 288 352 286 340 296" fill="none" stroke="#6b6b6b" stroke-width="11" stroke-linecap="round"/>
+  <path d="M246 324 C260 312 284 310 298 318" fill="none" stroke="#6b6b6b" stroke-width="10" stroke-linecap="round"/>
+  <path d="M394 324 C380 312 356 310 342 318" fill="none" stroke="#6b6b6b" stroke-width="10" stroke-linecap="round"/>
 
-  <!-- eyes (friendly squint) -->
-  <path d="M254 334 C266 320 288 320 298 334" fill="none" stroke="#2b2b2b" stroke-width="9" stroke-linecap="round"/>
-  <path d="M386 334 C374 320 352 320 342 334" fill="none" stroke="#2b2b2b" stroke-width="9" stroke-linecap="round"/>
+  <!-- eyes -->
+  <ellipse cx="272" cy="352" rx="22" ry="20" fill="#ffffff"/>
+  <ellipse cx="368" cy="352" rx="22" ry="20" fill="#ffffff"/>
+  <circle cx="275" cy="354" r="12" fill="#4a7fc1"/>
+  <circle cx="365" cy="354" r="12" fill="#4a7fc1"/>
+  <circle cx="275" cy="354" r="6.5" fill="#1b1b1b"/>
+  <circle cx="365" cy="354" r="6.5" fill="#1b1b1b"/>
+  <circle cx="279" cy="349" r="3.5" fill="#ffffff"/>
+  <circle cx="369" cy="349" r="3.5" fill="#ffffff"/>
+  <!-- friendly lower lids / smile lines -->
+  <path d="M250 368 C262 378 282 378 294 368" fill="none" stroke="#d9a077" stroke-width="4" stroke-linecap="round"/>
+  <path d="M390 368 C378 378 358 378 346 368" fill="none" stroke="#d9a077" stroke-width="4" stroke-linecap="round"/>
   <!-- cheeks -->
-  <ellipse cx="252" cy="384" rx="24" ry="14" fill="#f19b8a" opacity=".45"/>
-  <ellipse cx="388" cy="384" rx="24" ry="14" fill="#f19b8a" opacity=".45"/>
+  <ellipse cx="248" cy="392" rx="24" ry="14" fill="#f19b8a" opacity=".45"/>
+  <ellipse cx="392" cy="392" rx="24" ry="14" fill="#f19b8a" opacity=".45"/>
 
   <!-- nose -->
-  <path d="M320 336 C304 352 298 384 310 396 C318 402 328 402 334 396 C344 384 336 352 320 336 Z" fill="#e1a57a"/>
+  <path d="M320 350 C306 364 300 386 310 396 C318 402 328 402 334 396 C344 384 336 352 320 336 Z" fill="#e1a57a"/>
 
   <!-- moustache -->
   <path d="M320 402 C300 394 268 396 250 414 C240 424 244 438 258 436 C280 432 300 424 320 418 C340 424 360 432 382 436 C396 438 400 424 390 414 C372 396 340 394 320 402 Z" fill="#7a7a7a"/>

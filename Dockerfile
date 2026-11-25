@@ -5,6 +5,7 @@ WORKDIR /src
 COPY src/ZhkElectricityBot/ZhkElectricityBot.csproj src/ZhkElectricityBot/
 RUN dotnet restore src/ZhkElectricityBot/ZhkElectricityBot.csproj -a $TARGETARCH
 COPY src/ src/
+COPY assets/ assets/
 RUN dotnet publish src/ZhkElectricityBot/ZhkElectricityBot.csproj -c Release -a $TARGETARCH --no-restore -o /app \
  && mkdir -p /data
 

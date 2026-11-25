@@ -1,4 +1,4 @@
-# ZhkElectricityBot — «Дядько Електрик ⚡»
+# ZhkElectricityBot — «Бот-електрик ЖК Компаньйон ⚡»
 
 Telegram bot (C# / .NET 10) for the residents of ЖК «Компаньйон»: the LOE outage schedule for one group and the
 state of the backup power (Deye inverters + batteries). Speaks **Ukrainian only**.
@@ -129,8 +129,13 @@ ssh -i $KEY $VM "docker restart zhkelectricitybot"
 
 ## Bot profile
 
-Name, short description, description and the command menu are synced from `BotTexts.cs` on every start.
-Set once in @BotFather → Edit Bot: **Botpic** = `assets/avatar.jpg`, **Allow Groups** = off.
+Synced automatically on every start (only when something changed):
+
+- name, short description, description and the command menu — from `BotTexts.cs`;
+- profile photo — `assets/avatar.jpg` is embedded into the build; its SHA-256 is stored in `bot_state`, so the photo is
+  uploaded once after it changes (`setMyProfilePhoto`). To change the photo: replace `assets/avatar.jpg`, push.
+
+Set once in @BotFather → Edit Bot → Bot Settings: **Allow Groups** = off.
 
 ## Project layout
 
@@ -142,5 +147,5 @@ Set once in @BotFather → Edit Bot: **Botpic** = `assets/avatar.jpg`, **Allow G
 | `src/ZhkElectricityBot/Bot/` | polling, commands, features/access, broadcaster |
 | `src/ZhkElectricityBot/PowerMonitorService.cs` | clock-aligned 5 / 1-minute loop |
 | `src/ZhkElectricityBot/Storage/` | SQLite: subscribers, feature settings, state |
-| `assets/` | avatar (svg / png / jpg) |
+| `assets/` | avatar (svg source → png / jpg; the jpg is uploaded by the bot) |
 | `deploy/`, `.github/workflows/deploy.yml` | VM setup, deploy script, CI |
