@@ -33,6 +33,8 @@ builder.Services.AddHttpClient("deye", c => c.Timeout = TimeSpan.FromSeconds(30)
 builder.Services.AddSingleton<LoeClient>();
 builder.Services.AddSingleton<DeyeClient>();
 
+BotTexts.SafeMargin = TimeSpan.FromMinutes(config.GetValue("Battery:SafeMarginMinutes", 60));
+
 if (dryRun)
 {
     // Preview: read LOE and Deye live and print what the bot would say. No Telegram, no database.
@@ -54,6 +56,7 @@ builder.Services.AddSingleton<SubscriberStore>();
 builder.Services.AddSingleton<Features>();
 builder.Services.AddSingleton<Broadcaster>();
 builder.Services.AddSingleton<ScheduleService>();
+builder.Services.AddSingleton<StationNotifier>();
 builder.Services.AddSingleton<StationService>();
 builder.Services.AddSingleton<StatusReport>();
 builder.Services.AddSingleton<UpdateHandler>();

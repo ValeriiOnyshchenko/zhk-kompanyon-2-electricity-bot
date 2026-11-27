@@ -33,6 +33,16 @@ public sealed class Broadcaster(
         return sent;
     }
 
+    /// <summary>Every subscriber with the features they may have and didn't switch off.</summary>
+    public async Task<List<(long ChatId, HashSet<string> Features)>> RecipientsAsync(CancellationToken ct = default)
+    {
+        var disabled = await store.GetAllDisabledAsync(ct);
+        return (await store.GetAllAsync(ct))
+            .Select(s => (s.ChatId, features.AvailableTo(s.Username).Select(f => f.Id)
+                .Where(id => !disabled.Contains((s.ChatId, id))).ToHashSet()))
+            .ToList();
+    }
+
     public async Task<bool> SendOneAsync(long chatId, string html, CancellationToken ct = default)
     {
         for (var attempt = 1; ; attempt++)

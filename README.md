@@ -1,6 +1,6 @@
-# ZhkElectricityBot — «Бот-електрик ЖК Компаньйон ⚡»
+# ZhkElectricityBot — «Пан Амперій ⚡»
 
-Telegram bot (C# / .NET 10) for the residents of ЖК «Компаньйон»: the LOE outage schedule for one group and the
+Telegram bot «Пан Амперій» (C# / .NET 10) for the residents of ЖК «Компаньйон»: the LOE outage schedule for one group and the
 state of the backup power (Deye inverters + batteries). Speaks **Ukrainian only**.
 
 ## Features
@@ -36,16 +36,27 @@ Read from the Deye Cloud Open API: `/station/latest` (SOC, load, battery/grid po
 - **Every `StatusIntervalMinutes` (60) during an outage:** charge (and drop since the start), load, autonomy,
   expected end of the outage, and whether the charge will last.
 - **Warnings** at `WarnSocLevels` (30 %, 10 %), once per outage each (the status due at the same moment is skipped).
-- **No data** for `StaleDataMinutes` (30) → one «📡 немає даних від станції», and one message when it's back.
+- **No data** for `StaleDataMinutes` (30) — stale data in the cloud or Deye Cloud not answering → one «📡 немає даних від станції», and one message when it's back.
+- **One message for all stations:** power lost, hourly status and power back usually happen to both stations within
+  a minute or two, so a user who follows both gets **one** message — a section per station (`Order`: the apartment 🏠
+  first, then the ЖК 🏢). The message waits until both stations have the event, at most `CombineWindowMinutes` (5);
+  further apart — separately. A user with one station gets it immediately.
+- Every station section starts with two lines: the object (`Icon` + `Title`) and the event.
 - First reading after the first deploy only remembers the state (no message). The outage state is stored, so an outage
   in progress survives a redeploy.
 
-**Autonomy forecast.** From the real discharge since the outage started:
-`hours left = (SOC − ReserveSocPercent) / (SOC drop / hours without power)` — e.g. −25 % in 1 h at 75 % → ~3 h.
+**Autonomy forecast.** The inverter is assumed to shut off at `ReserveSocPercent` (10 %). From the real discharge
+since the outage started: `hours left = (SOC − 10) / (SOC drop / hours without power)` — e.g. −22 % in 1 h at 78 % → ~3 h.
 A short peak of load doesn't skew it. Until the outage lasts `MinForecastMinutes` (15) and the charge dropped
-`MinForecastSocDrop` (2 %), it uses the current load: `SOC × capacity / load`.
+`MinForecastSocDrop` (2 %), it uses the current load: `(SOC − 10) × capacity / load` (the larger of load and battery
+power — right after the switch the cloud still shows ~0 W battery power).
 Capacity comes from the API: `BatteryRatedCapacity` (Ah) × nominal voltage (LiFePO4, 16 cells per module × 3.2 V,
 derived from the measured voltage) — override with `Stations:N:CapacityKwh`.
+
+**Verdict** — margin = when the batteries run out − when power returns per schedule:
+more than `SafeMarginMinutes` (60) → «✅ Заряду вистачає до кінця вимкнення»; 0…60 min → «⚠️ Заряду може не вистачити…»;
+below 0 → «🚨 Заряду не вистачає…». Shown in every on-battery message (lost, hourly, warnings, /status) when the outage
+is on the schedule.
 
 **Expected outage end** comes from the schedule: a scheduled outage that starts within an hour or is under way
 (power can go early, switching on can take up to an hour). None → «вимкнення поза графіком».
@@ -64,7 +75,7 @@ All requests (LOE + Deye) run in one loop:
 | Command | |
 |---|---|
 | `/start` | subscribe; welcome + current status |
-| `/status` | stations available to the user + schedule for today/tomorrow |
+| `/status` | what the user's inverters do now (apartment, then ЖК): grid or batteries, charge, load, charging power, autonomy; «немає звʼязку з інвертором» when Deye Cloud can't be read |
 | `/schedule` | schedule for today/tomorrow |
 | `/settings` | switch features on/off |
 | `/stop` (or blocking the bot) | unsubscribe |
@@ -79,8 +90,8 @@ Everything non-secret is there (env vars override, e.g. `Polling__IdleIntervalMi
 | `Polling` | `IdleIntervalMinutes`, `ActiveIntervalMinutes`, `ActiveBeforeOutageMinutes`, `ActiveAfterOutageMinutes` |
 | `Schedule` | `Enabled`, `Url`, `SiteUrl`, `Group` (3.1), `ReminderMinutes` |
 | `Deye` | `BaseUrl` (eu1) |
-| `Battery` | `StatusIntervalMinutes`, `WarnSocLevels`, `ReserveSocPercent`, `GridVoltageThreshold`, `MinForecastMinutes`, `MinForecastSocDrop`, `StaleDataMinutes`, `NominalCellVoltage` |
-| `Stations` | `Key`, `Title`, `OwnerOnly`, `CapacityKwh` (0 = from API); `StationId` comes from secrets |
+| `Battery` | `StatusIntervalMinutes`, `WarnSocLevels`, `ReserveSocPercent`, `GridVoltageThreshold`, `MinForecastMinutes`, `MinForecastSocDrop`, `StaleDataMinutes`, `SafeMarginMinutes`, `CombineWindowMinutes`, `NominalCellVoltage` |
+| `Stations` | `Key`, `Title`, `Icon`, `Order`, `OwnerOnly`, `CapacityKwh` (0 = from API); `StationId` comes from secrets |
 
 ## Secrets (GitHub → Settings → Secrets and variables → Actions)
 
@@ -92,7 +103,6 @@ Everything non-secret is there (env vars override, e.g. `Polling__IdleIntervalMi
 | `DEYE_EMAIL`, `DEYE_PASSWORD` | Deye Cloud account (the password is SHA-256 hashed by the bot) |
 | `DEYE_COMPLEX_STATION_ID` | Deye station id of the ЖК |
 | `DEYE_HOME_STATION_ID` | Deye station id of the owner-only station |
-| `HOME_STATION_TITLE` | *(optional)* display name of the owner-only station |
 | `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY` | the VM (same format as other bots on it) |
 
 Nothing private is committed: no tokens, ids, addresses or usernames.

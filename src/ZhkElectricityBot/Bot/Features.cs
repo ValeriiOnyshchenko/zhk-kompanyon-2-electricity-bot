@@ -22,7 +22,7 @@ public sealed class Features
         var list = new List<Feature>();
         if (schedule.Value.Enabled)
             list.Add(new Feature(Schedule, $"Графік вимкнень (група {schedule.Value.Group})", false));
-        foreach (var s in stations.Value.Where(s => s.StationId > 0))
+        foreach (var s in stations.Value.Where(s => s.StationId > 0).OrderBy(s => s.Order))
             list.Add(new Feature(Station(s.Key), s.Title, s.OwnerOnly));
         All = list;
     }

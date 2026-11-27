@@ -60,7 +60,6 @@ jobs:
           DEYE_PASSWORD: ${{ secrets.DEYE_PASSWORD }}
           DEYE_COMPLEX_STATION_ID: ${{ secrets.DEYE_COMPLEX_STATION_ID }}
           DEYE_HOME_STATION_ID: ${{ secrets.DEYE_HOME_STATION_ID }}
-          HOME_STATION_TITLE: ${{ secrets.HOME_STATION_TITLE }}
           IMAGE: ${{ needs.build.outputs.image }}
           GHCR_USER: ${{ github.actor }}
           GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -77,7 +76,7 @@ jobs:
           # Secrets go through stdin, never on the remote command line.
           {
             for v in BOT_TOKEN OWNER_USERNAME DEYE_APP_ID DEYE_APP_SECRET DEYE_EMAIL DEYE_PASSWORD \
-                     DEYE_COMPLEX_STATION_ID DEYE_HOME_STATION_ID HOME_STATION_TITLE IMAGE GHCR_USER GHCR_TOKEN; do
+                     DEYE_COMPLEX_STATION_ID DEYE_HOME_STATION_ID IMAGE GHCR_USER GHCR_TOKEN; do
               printf '%s=%q\n' "$v" "${!v}"
             done
             cat deploy/remote-deploy.sh

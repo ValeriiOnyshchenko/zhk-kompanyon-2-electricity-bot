@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Runs ON THE VM, piped in by the GitHub Actions deploy job.
-# Expects the secrets (BOT_TOKEN, OWNER_USERNAME, DEYE_*, HOME_STATION_TITLE) and IMAGE, GHCR_USER, GHCR_TOKEN
+# Expects the secrets (BOT_TOKEN, OWNER_USERNAME, DEYE_*) and IMAGE, GHCR_USER, GHCR_TOKEN
 # to be defined before this script.
 set -euo pipefail
 
@@ -19,7 +19,6 @@ mkdir -p "$APP_DIR"
     printf 'Deye__Password=%s\n'          "$DEYE_PASSWORD"
     printf 'Stations__0__StationId=%s\n'  "$DEYE_COMPLEX_STATION_ID"
     printf 'Stations__1__StationId=%s\n'  "$DEYE_HOME_STATION_ID"
-    if [ -n "${HOME_STATION_TITLE:-}" ]; then printf 'Stations__1__Title=%s\n' "$HOME_STATION_TITLE"; fi
   } > "$APP_DIR/bot.env"
 )
 

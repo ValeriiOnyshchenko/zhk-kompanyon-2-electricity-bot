@@ -14,14 +14,14 @@ public sealed class StationService(
     DeyeClient deye,
     ScheduleService schedule,
     StateStore store,
-    Broadcaster broadcaster,
+    StationNotifier notifier,
     LocalClock clock,
     IOptions<List<StationOptions>> stations,
     IOptions<BatteryOptions> battery,
     ILogger<StationService> log)
 {
     private readonly BatteryOptions _b = battery.Value;
-    private readonly List<Station> _stations = stations.Value.Where(s => s.StationId > 0).Select(s => new Station(s)).ToList();
+    private readonly List<Station> _stations = stations.Value.Where(s => s.StationId > 0).OrderBy(s => s.Order).Select(s => new Station(s)).ToList();
 
     public sealed class Station(StationOptions options)
     {
@@ -33,6 +33,9 @@ public sealed class StationService(
         public DateTimeOffset? LastReadAt { get; set; }
         public List<string> InverterSns { get; set; } = [];
         public DateTimeOffset DevicesReadAt { get; set; }
+
+        /// <summary>Since when Deye Cloud can't be read for this station (null = last read worked).</summary>
+        public DateTimeOffset? FailingSince { get; set; }
     }
 
     public IReadOnlyList<Station> Stations => _stations;
@@ -68,9 +71,26 @@ public sealed class StationService(
             catch (Exception ex) when (ex is not OperationCanceledException)
             {
                 log.LogWarning("Station {Key}: check failed: {Error}", s.Options.Key, ex.Message);
+                await OnReadFailedAsync(s, ct);
             }
         }
+        await notifier.FlushAsync(_stations, clock.UtcNow, ct);
     }
+
+    /// <summary>Deye Cloud can't be read — after <see cref="BatteryOptions.StaleDataMinutes"/> tell once, like stale data.</summary>
+    private async Task OnReadFailedAsync(Station s, CancellationToken ct)
+    {
+        var now = clock.UtcNow;
+        s.FailingSince ??= now;
+        var since = s.Last?.UpdatedUtc ?? s.FailingSince.Value;
+        if (s.State.OfflineAlerted || now - since <= TimeSpan.FromMinutes(_b.StaleDataMinutes)) return;
+        s.State.OfflineAlerted = true;
+        await SaveAsync(s, ct);
+        Notify(s, StationEventKind.Offline, BotTexts.StationOffline(now - since, s.Last?.UpdatedUtc, clock), now);
+    }
+
+    private void Notify(Station s, StationEventKind kind, string body, DateTimeOffset now) =>
+        notifier.Add(new StationEvent(s, kind, body, now));
 
     /// <summary>Reads the station now (used by the checks and, if nothing was read yet, by /status).</summary>
     public async Task<StationReading> ReadAsync(Station s, CancellationToken ct)
@@ -98,6 +118,7 @@ public sealed class StationService(
 
         s.Last = reading;
         s.LastReadAt = clock.UtcNow;
+        s.FailingSince = null;
         return reading;
     }
 
@@ -107,7 +128,6 @@ public sealed class StationService(
         var now = clock.UtcNow;
         var st = s.State;
         var changed = false;
-        var title = s.Options.Title;
 
         // ---- stale data: the logger (or its internet) is down ----
         var age = r.UpdatedUtc is { } u ? now - u : TimeSpan.Zero;
@@ -117,7 +137,7 @@ public sealed class StationService(
             {
                 st.OfflineAlerted = true;
                 await SaveAsync(s, ct);
-                await broadcaster.SendAsync(s.Feature, BotTexts.StationOffline(title, age, r.UpdatedUtc, clock), ct);
+                Notify(s, StationEventKind.Offline, BotTexts.StationOffline(age, r.UpdatedUtc, clock), now);
             }
             return; // old data says nothing about the grid now
         }
@@ -125,7 +145,7 @@ public sealed class StationService(
         {
             st.OfflineAlerted = false;
             changed = true;
-            await broadcaster.SendAsync(s.Feature, BotTexts.StationOnline(title), ct);
+            Notify(s, StationEventKind.Online, BotTexts.StationOnline, now);
         }
 
         log.LogDebug("Station {Key}: grid {Grid}, SOC {Soc}, load {Load} W", s.Options.Key, r.GridOn, r.Soc, r.LoadW);
@@ -152,7 +172,7 @@ public sealed class StationService(
             StartOutage(st, r, now);
             await SaveAsync(s, ct);
             log.LogInformation("Station {Key}: grid lost", s.Options.Key);
-            await broadcaster.SendAsync(s.Feature, BotTexts.GridLost(title, r, Forecast(st, r, now), schedule.CurrentOutage(now), now, clock), ct);
+            Notify(s, StationEventKind.GridLost, BotTexts.GridLost(r, Forecast(st, r, now), schedule.CurrentOutage(now), now, clock), now);
             return;
         }
 
@@ -168,7 +188,7 @@ public sealed class StationService(
             st.LastGridReturn = now;
             await SaveAsync(s, ct);
             log.LogInformation("Station {Key}: grid back after {Duration}", s.Options.Key, duration);
-            await broadcaster.SendAsync(s.Feature, BotTexts.GridBack(title, r, duration, used), ct);
+            Notify(s, StationEventKind.GridBack, BotTexts.GridBack(r, duration, used), now);
             return;
         }
 
@@ -186,7 +206,7 @@ public sealed class StationService(
                     // The warning already carries the status — don't send both at once.
                     while (st.NextStatusAt <= now) st.NextStatusAt += interval;
                     await SaveAsync(s, ct);
-                    await broadcaster.SendAsync(s.Feature, BotTexts.LowBattery(title, crossed[0], r, Forecast(st, r, now), now, clock), ct);
+                    Notify(s, StationEventKind.LowBattery, BotTexts.LowBattery(crossed[0], r, Forecast(st, r, now), schedule.CurrentOutage(now), now, clock), now);
                 }
             }
 
@@ -195,8 +215,8 @@ public sealed class StationService(
                 while (st.NextStatusAt <= now) st.NextStatusAt += interval;
                 await SaveAsync(s, ct);
                 changed = false;
-                await broadcaster.SendAsync(s.Feature,
-                    BotTexts.BatteryStatus(title, r, st, Forecast(st, r, now), schedule.CurrentOutage(now), now, clock), ct);
+                Notify(s, StationEventKind.Status,
+                    BotTexts.BatteryStatus(r, st, Forecast(st, r, now), schedule.CurrentOutage(now), now, clock), now);
             }
         }
 
@@ -230,7 +250,9 @@ public sealed class StationService(
                 return new Forecast(TimeSpan.FromHours(usable / (drop / elapsed.TotalHours)), true, drop, elapsed);
         }
 
-        var drawW = r.BatteryW is > 0 ? r.BatteryW.Value : r.LoadW ?? 0;
+        // The cloud's battery power lags behind right after the switch (it may still show ~0 W) — the load is what the
+        // batteries carry now, so take the larger of the two.
+        var drawW = Math.Max(r.LoadW ?? 0, r.BatteryW ?? 0);
         if (drawW > 10 && r.CapacityKwh is { } cap and > 0)
             return new Forecast(TimeSpan.FromHours(usable / 100 * cap / (drawW / 1000)), false, null, null);
 

@@ -31,9 +31,10 @@ public sealed class StatusReport(
                 }
             }
             var f = s.Last is { } r && r.GridOn == false ? stations.Forecast(s.State, r, now) : null;
-            parts.Add(BotTexts.StationNow(s.Options.Title, s.Last, s.State, f, schedule.CurrentOutage(now), schedule.NextOutage(now), now, clock));
+            parts.Add(BotTexts.Section(s.Options, s.FailingSince is not null || s.Last is null
+                ? BotTexts.StationUnreachable(s.Last?.UpdatedUtc, clock)
+                : BotTexts.StationNow(s.Last, s.State, f, schedule.CurrentOutage(now), now, clock)));
         }
-        if (available.Any(f => f.Id == Features.Schedule)) parts.Add(Schedule());
-        return parts.Count > 0 ? string.Join("\n\n— — —\n\n", parts) : BotTexts.NoData;
+        return parts.Count > 0 ? string.Join("\n\n", parts) : BotTexts.NoData;
     }
 }

@@ -55,9 +55,9 @@ public static class DryRun
                 // What the outage messages would look like if the grid went down right now.
 
                 var f = ForecastFromLoad(r, battery);
-                Console.WriteLine(Plain(BotTexts.StationNow(s.Title, r, new StationState(), null, null, null, now, clock)));
+                Console.WriteLine(Plain(BotTexts.Section(s, BotTexts.StationNow(r, new StationState(), null, null, now, clock))));
                 Console.WriteLine("\n--- if the grid went down now ---");
-                Console.WriteLine(Plain(BotTexts.GridLost(s.Title, r, f, null, now, clock)));
+                Console.WriteLine(Plain(BotTexts.Section(s, BotTexts.GridLost(r, f, null, now, clock))));
             }
             catch (Exception ex)
             {
@@ -68,7 +68,7 @@ public static class DryRun
 
     private static Forecast? ForecastFromLoad(StationReading r, BatteryOptions o) =>
         r.Soc is { } soc && r.LoadW is > 10 && r.CapacityKwh is > 0
-            ? new Forecast(TimeSpan.FromHours((soc - o.ReserveSocPercent) / 100 * r.CapacityKwh.Value / (r.LoadW.Value / 1000)), false, null, null)
+            ? new Forecast(TimeSpan.FromHours((soc - o.ReserveSocPercent) / 100 * r.CapacityKwh.Value / (r.LoadW.Value / 1000) ), false, null, null)
             : null;
 
     private static string Plain(string html) =>

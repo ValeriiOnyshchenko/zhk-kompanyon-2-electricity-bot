@@ -75,8 +75,14 @@ public sealed class BatteryOptions
     /// <summary>One warning per level when the charge falls to it during an outage.</summary>
     public List<int> WarnSocLevels { get; set; } = [30, 10];
 
-    /// <summary>The forecast counts time until the charge reaches this level (inverter cut-off). 0 = until empty.</summary>
-    public int ReserveSocPercent { get; set; } = 0;
+    /// <summary>The forecast counts time until the charge reaches this level — assume the inverter shuts off here.</summary>
+    public int ReserveSocPercent { get; set; } = 10;
+
+    /// <summary>
+    /// Battery runs out more than this long after the scheduled end → ✅ «вистачає»; less → ⚠️ «може не вистачити»;
+    /// before the scheduled end → 🚨 «не вистачає».
+    /// </summary>
+    public int SafeMarginMinutes { get; set; } = 60;
 
     /// <summary>Grid is considered present when every grid phase voltage is above this (V).</summary>
     public double GridVoltageThreshold { get; set; } = 150;
@@ -90,6 +96,12 @@ public sealed class BatteryOptions
     /// <summary>If the cloud has no fresh data for this long, the station is reported as offline (once).</summary>
     public int StaleDataMinutes { get; set; } = 30;
 
+    /// <summary>
+    /// Power lost / hourly status / power back of several stations within this many minutes go out as one message
+    /// (in <see cref="StationOptions.Order"/>). Further apart — separately.
+    /// </summary>
+    public int CombineWindowMinutes { get; set; } = 5;
+
     /// <summary>LiFePO4: 3.2 V per cell. Used to turn the rated Ah from the API into kWh.</summary>
     public double NominalCellVoltage { get; set; } = 3.2;
 }
@@ -100,6 +112,12 @@ public sealed class StationOptions
     public string Key { get; set; } = "";
 
     public string Title { get; set; } = "";
+
+    /// <summary>Shown before the title in the first line of every message, e.g. 🏠 / 🏢.</summary>
+    public string Icon { get; set; } = "🏢";
+
+    /// <summary>Order in /status and in combined messages (smaller first).</summary>
+    public int Order { get; set; }
 
     /// <summary>Deye Cloud station id. Secret (DEYE_*_STATION_ID). 0 = station disabled.</summary>
     public long StationId { get; set; }

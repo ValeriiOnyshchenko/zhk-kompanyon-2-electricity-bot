@@ -18,11 +18,12 @@ public static class Text
 
     public static string Minutes(int m) => m >= 1440 ? "24:00" : $"{m / 60:00}:{m % 60:00}";
 
-    /// <summary>"3 год 30 хв", "45 хв", "менше хвилини".</summary>
+    /// <summary>"3 год 30 хв", "45 хв", "менше хвилини". From an hour up — rounded to 5 min ("3 год 1 хв" → "3 год").</summary>
     public static string Duration(TimeSpan d)
     {
         if (d < TimeSpan.Zero) d = TimeSpan.Zero;
         var total = (int)Math.Round(d.TotalMinutes);
+        if (total >= 60) total = (int)Math.Round(total / 5.0) * 5;
         if (total < 1) return "менше хвилини";
         var h = total / 60;
         var m = total % 60;
